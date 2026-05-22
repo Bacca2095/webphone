@@ -10,7 +10,7 @@ export default defineConfig({
       entry: fileURLToPath(new URL('./src/webphone.ce.ts', import.meta.url)),
       name: 'WebPhone',
       formats: ['es', 'iife'],
-      fileName: (format) => format === 'iife' ? 'webphone.wc.global.js' : 'webphone.wc.js',
+      fileName: (format) => `webphone.${format}.js`,
     },
     rollupOptions: {
       external: [],

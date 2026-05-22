@@ -14,7 +14,7 @@
     },
     "./style.css": "./dist/style.css",
     "./webcomponent": {
-      "import": "./dist/webphone.wc.js"
+      "import": "./dist/webphone.es.js"
     }
   },
   "main": "./dist/index.js",
