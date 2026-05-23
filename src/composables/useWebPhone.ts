@@ -1,5 +1,4 @@
 import { computed } from 'vue'
-import { Originator } from 'jssip/lib/RTCSession'
 import type { PeerConnectionEvent, HoldEvent } from 'jssip/lib/RTCSession'
 import type { RTCSessionEvent } from 'jssip/lib/UA'
 import { createUA, destroyUA, getUA, addSession, getSession, removeSession, attachAudio, detachAudio } from '../core/sip'
@@ -35,8 +34,8 @@ export const useWebPhone = () => {
 
       store.addChannel({
         id,
-        direction: originator === Originator.REMOTE ? 'incoming' : 'outgoing',
-        status: originator === Originator.REMOTE ? 'ringing' : 'connecting',
+        direction: originator === 'remote' ? 'incoming' : 'outgoing',
+        status: originator === 'remote' ? 'ringing' : 'connecting',
         remoteUri: session.remote_identity.uri.toString(),
         remoteName: session.remote_identity.display_name ?? '',
         startTime: null,
@@ -65,7 +64,7 @@ export const useWebPhone = () => {
       session.on('confirmed', onActivated)
 
       session.on('hold', (holdEvent: HoldEvent) => {
-        store.updateStatus(id, holdEvent.originator === Originator.LOCAL ? 'held' : 'remote_held')
+        store.updateStatus(id, holdEvent.originator === 'local' ? 'held' : 'remote_held')
       })
 
       session.on('unhold', () => {

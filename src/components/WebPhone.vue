@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, useTemplateRef } from 'vue'
-import { useElementBounding } from '@vueuse/core'
-import { useDraggable } from '@vueuse/core'
+import { useElementBounding, useDraggable, useDark, useToggle } from '@vueuse/core'
 import {
   Phone, PhoneOff, PhoneIncoming, PhoneMissed,
   Mic, MicOff, Pause, Play, Volume2,
@@ -35,9 +34,9 @@ const floatStyle = computed(() =>
 )
 
 const shadowHost = ref<HTMLElement | null>(null)
-const darkMode = ref(false)
-const toggleDark = () => { darkMode.value = !darkMode.value }
-watch(darkMode, (isDark) => { shadowHost.value?.classList.toggle('dark', isDark) })
+const isDark = useDark({ storageKey: 'webphone-color-scheme' })
+const toggleDark = useToggle(isDark)
+watch(isDark, (dark) => { shadowHost.value?.classList.toggle('dark', dark) }, { immediate: true })
 
 const { channels, isRegistered, isConnecting, call, answer, hangup, hold, resume, mute, unmute, sendDTMF } = useWebPhone()
 
@@ -46,10 +45,6 @@ const { permission, inputDevices, outputDevices, selectedInputId, selectedOutput
 onMounted(async () => {
   const rootNode = rootEl.value?.getRootNode()
   if (rootNode instanceof ShadowRoot) shadowHost.value = rootNode.host as HTMLElement
-
-  const mq = window.matchMedia('(prefers-color-scheme: dark)')
-  darkMode.value = mq.matches
-  mq.addEventListener('change', (e) => { darkMode.value = e.matches })
 
   await checkPermission()
   if (props.config) { const { connect } = useWebPhone(); connect(props.config) }
@@ -86,8 +81,10 @@ const callBtnMode = computed<'call' | 'disabled'>(() =>
   !selected.value && dialValue.value && isRegistered.value ? 'call' : 'disabled',
 )
 
+const inputFocused = ref(false)
+
 const contactResults = computed<Contact[]>(() => {
-  if (!dialValue.value || !props.contacts?.length || selected.value) return []
+  if (!inputFocused.value || !dialValue.value || !props.contacts?.length || selected.value) return []
   const q = dialValue.value.toLowerCase()
   return props.contacts
     .filter(c => c.name.toLowerCase().includes(q) || c.phone.toLowerCase().includes(q))
@@ -96,6 +93,7 @@ const contactResults = computed<Contact[]>(() => {
 
 const pickContact = (c: Contact) => {
   dialValue.value = c.phone
+  inputFocused.value = false
 }
 
 const CONTACT_TYPE = {
@@ -146,14 +144,14 @@ const isOnHold = (s: CallInfo['status']) => s === 'held' || s === 'remote_held'
 <template>
   <div
     ref="root" :style="floatStyle"
-    class="w-full max-w-xs rounded-3xl bg-background shadow-lg overflow-hidden select-none flex flex-col border-0"
-    :class="{ 'z-50': props.float, dark: darkMode && !shadowHost }"
+    class="w-full max-w-[18rem] rounded-3xl bg-background shadow-md overflow-hidden select-none flex flex-col border"
+    :class="{ 'z-50': props.float }"
     @keydown="onKeydown" tabindex="-1"
   >
 
     <div
       ref="handle"
-      class="flex items-center justify-between px-5 py-3 bg-muted/40"
+      class="flex items-center justify-between px-5 py-3 bg-muted/70"
       :class="props.float ? (isDragging ? 'cursor-grabbing' : 'cursor-grab') : ''"
     >
       <span class="text-xs font-medium text-muted-foreground">Webphone</span>
@@ -161,8 +159,8 @@ const isOnHold = (s: CallInfo['status']) => s === 'held' || s === 'remote_held'
         <span class="size-2 rounded-full" :class="isRegistered ? 'bg-green-500' : isConnecting ? 'bg-amber-400 animate-pulse' : 'bg-muted-foreground/30'" />
         <span class="text-xs text-muted-foreground">{{ isConnecting ? 'Conectando…' : isRegistered ? 'Registrado' : 'Sin conexión' }}</span>
 
-        <button class="text-muted-foreground hover:text-foreground transition-colors" @click="toggleDark">
-          <Sun v-if="darkMode" class="size-3.5" />
+        <button class="text-muted-foreground hover:text-foreground transition-colors" @click="() => toggleDark()">
+          <Sun v-if="isDark" class="size-3.5" />
           <Moon v-else class="size-3.5" />
         </button>
 
@@ -279,7 +277,9 @@ const isOnHold = (s: CallInfo['status']) => s === 'held' || s === 'remote_held'
           ref="dialInput"
           v-model="dialValue"
           placeholder="Buscar o marcar…"
-          class="flex-1 text-center text-base tracking-widest border-0 shadow-none bg-transparent focus-visible:ring-0 placeholder:text-muted-foreground/30"
+          class="flex-1 text-center"
+          @focus="inputFocused = true"
+          @blur="inputFocused = false"
           @keydown.enter.prevent="onCallBtn"
         />
         <button v-if="dialValue" class="text-muted-foreground hover:text-foreground transition-colors shrink-0" @click="onBack">
