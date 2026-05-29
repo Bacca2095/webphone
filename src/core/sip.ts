@@ -29,6 +29,7 @@ export const createUA = (config: WebPhoneConfig): UA => {
 export const getUA = (): UA | null => ua
 
 export const destroyUA = (): void => {
+  sessions.forEach(session => { try { session.terminate() } catch {} })
   sessions.clear()
   audioElements.forEach((el) => el.remove())
   audioElements.clear()
@@ -47,9 +48,19 @@ export const removeSession = (id: string): void => {
 }
 
 export const attachAudio = (id: string, stream: MediaStream): void => {
-  const audio = new Audio()
+  const existing = audioElements.get(id)
+  if (existing) {
+    if (existing.srcObject !== stream) existing.srcObject = stream
+    if (existing.paused) existing.play().catch(() => {})
+    return
+  }
+
+  const audio = document.createElement('audio')
+  audio.autoplay = true
+  audio.style.display = 'none'
+  document.body.appendChild(audio)
   audio.srcObject = stream
-  audio.play().catch(() => {})
+  audio.play().catch((err) => console.warn('[webphone] audio play blocked:', err))
   audioElements.set(id, audio)
 }
 
@@ -58,6 +69,7 @@ export const detachAudio = (id: string): void => {
   if (!audio) return
   audio.pause()
   audio.srcObject = null
+  audio.remove()
   audioElements.delete(id)
 }
 
@@ -70,8 +82,14 @@ export const setOutputDevice = async (deviceId: string): Promise<void> => {
 }
 
 export const setOutputVolume = (volume: number): void => {
-  const v = Math.max(0, Math.min(1, volume / 100))
+  const normalized = Math.max(0, Math.min(1, volume / 100))
   for (const audio of audioElements.values()) {
-    audio.volume = v
+    audio.volume = normalized
+  }
+}
+
+export const setOutputMuted = (muted: boolean): void => {
+  for (const audio of audioElements.values()) {
+    audio.muted = muted
   }
 }

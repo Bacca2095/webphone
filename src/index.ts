@@ -8,7 +8,7 @@ export { useAudioDevices } from './composables/useAudioDevices'
 export { useWebPhoneStore } from './stores/webphone'
 export { default as WebPhone } from './components/WebPhone.vue'
 export type { CallInfo, CallStatus, CallDirection, WebPhoneConfig, Contact, ContactType } from './types'
-export type { PermissionState } from './composables/useAudioDevices'
+export type { MicPermission } from './composables/useAudioDevices'
 
 export const WebPhonePlugin: Plugin = {
   install(_app: App) {

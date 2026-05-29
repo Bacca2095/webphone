@@ -36,20 +36,20 @@ const setDisconnected = () => { store.isRegistered = false; store.isConnecting =
 
 const addRinging = () => {
   const c = pick()
-  store.addChannel({ id: uid(), direction: 'incoming', status: 'ringing', remoteUri: c.uri, remoteName: c.name, startTime: null, duration: 0, isMuted: false })
+  store.addChannel({ id: uid(), direction: 'incoming', status: 'ringing', remoteUri: c.uri, remoteName: c.name, startTime: null, duration: 0, isMuted: false, notes: '' })
 }
 const addActive = () => {
   const c = pick(); const id = uid()
-  store.addChannel({ id, direction: 'outgoing', status: 'active', remoteUri: c.uri, remoteName: c.name, startTime: null, duration: 0, isMuted: false })
+  store.addChannel({ id, direction: 'outgoing', status: 'active', remoteUri: c.uri, remoteName: c.name, startTime: null, duration: 0, isMuted: false, notes: '' })
   store.startTimer(id)
 }
 const addHeld = () => {
   const c = pick()
-  store.addChannel({ id: uid(), direction: 'incoming', status: 'held', remoteUri: c.uri, remoteName: c.name, startTime: new Date(Date.now() - 62_000), duration: 62, isMuted: false })
+  store.addChannel({ id: uid(), direction: 'incoming', status: 'held', remoteUri: c.uri, remoteName: c.name, startTime: new Date(Date.now() - 62_000), duration: 62, isMuted: false, notes: '' })
 }
 const addConnecting = () => {
   const c = pick()
-  store.addChannel({ id: uid(), direction: 'outgoing', status: 'connecting', remoteUri: c.uri, remoteName: c.name, startTime: null, duration: 0, isMuted: false })
+  store.addChannel({ id: uid(), direction: 'outgoing', status: 'connecting', remoteUri: c.uri, remoteName: c.name, startTime: null, duration: 0, isMuted: false, notes: '' })
 }
 const toggleMute = () => {
   const active = store.channels.find(c => c.status === 'active')

@@ -1,10 +1,10 @@
 import { ref, computed, watch } from 'vue'
 import { setOutputDevice, setOutputVolume } from '../core/sip'
 
-export type PermissionState = 'unknown' | 'prompt' | 'granted' | 'denied'
+export type MicPermission = 'unknown' | 'prompt' | 'granted' | 'denied'
 
 export const useAudioDevices = () => {
-  const permission = ref<PermissionState>('unknown')
+  const permission = ref<MicPermission>('unknown')
   const devices = ref<MediaDeviceInfo[]>([])
   const selectedInputId = ref('')
   const selectedOutputId = ref('')
@@ -29,7 +29,7 @@ export const useAudioDevices = () => {
   const requestPermission = async (): Promise<void> => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-      stream.getTracks().forEach((t) => t.stop())
+      stream.getTracks().forEach((track) => track.stop())
       permission.value = 'granted'
       await refreshDevices()
     } catch {
@@ -43,12 +43,12 @@ export const useAudioDevices = () => {
       return
     }
     const status = await navigator.permissions.query({ name: 'microphone' as PermissionName })
-    permission.value = status.state as PermissionState
+    permission.value = status.state as MicPermission
 
     if (status.state === 'granted') await refreshDevices()
 
     status.addEventListener('change', async () => {
-      permission.value = status.state as PermissionState
+      permission.value = status.state as MicPermission
       if (status.state === 'granted') await refreshDevices()
     })
   }
@@ -69,6 +69,5 @@ export const useAudioDevices = () => {
     outputVolume,
     requestPermission,
     checkPermission,
-    refreshDevices,
   }
 }

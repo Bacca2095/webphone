@@ -1,5 +1,18 @@
 export type CallDirection = 'incoming' | 'outgoing'
 
+export type CallOutcome = 'answered' | 'missed' | 'failed'
+
+export interface CallRecord {
+  id: string
+  direction: CallDirection
+  remoteUri: string
+  remoteName: string
+  duration: number
+  outcome: CallOutcome
+  endedAt: Date
+  notes: string
+}
+
 export type CallStatus =
   | 'ringing'      // incoming, awaiting answer
   | 'connecting'   // outgoing, awaiting remote answer
@@ -18,6 +31,7 @@ export interface CallInfo {
   startTime: Date | null
   duration: number // seconds, updated each second while active
   isMuted: boolean
+  notes: string
 }
 
 export type ContactType = 'internal' | 'external' | 'service' | 'emergency'

@@ -5,6 +5,17 @@ import { createUA, destroyUA, getUA, addSession, getSession, removeSession, atta
 import { useWebPhoneStore } from '../stores/webphone'
 import type { WebPhoneConfig } from '../types'
 
+const AUDIO_CONSTRAINTS = { audio: true, video: false } as const
+
+const getAudioStream = async (): Promise<MediaStream | null> => {
+  try {
+    return await navigator.mediaDevices.getUserMedia(AUDIO_CONSTRAINTS)
+  } catch (err) {
+    console.warn('[webphone] microphone access denied', err)
+    return null
+  }
+}
+
 export const useWebPhone = () => {
   const store = useWebPhoneStore()
 
@@ -36,25 +47,41 @@ export const useWebPhone = () => {
         id,
         direction: originator === 'remote' ? 'incoming' : 'outgoing',
         status: originator === 'remote' ? 'ringing' : 'connecting',
-        remoteUri: session.remote_identity.uri.toString(),
+        remoteUri: session.remote_identity.uri.user ?? session.remote_identity.uri.toString(),
         remoteName: session.remote_identity.display_name ?? '',
         startTime: null,
         duration: 0,
         isMuted: false,
+        notes: '',
       })
 
-      session.on('peerconnection', (pcEvent: PeerConnectionEvent) => {
-        pcEvent.peerconnection.addEventListener('track', (trackEvent: RTCTrackEvent) => {
-          if (trackEvent.streams[0]) attachAudio(id, trackEvent.streams[0])
+      const setupTrackListener = (pc: RTCPeerConnection) => {
+        pc.addEventListener('track', (trackEvent: RTCTrackEvent) => {
+          const stream = trackEvent.streams[0] ?? new MediaStream([trackEvent.track])
+          attachAudio(id, stream)
         })
-      })
+      }
 
+      // For outgoing calls, peerconnection fires before newRTCSession — use the existing PC directly.
+      // For incoming calls, the PC is created on answer() — wait for the peerconnection event.
+      if (session.connection) {
+        setupTrackListener(session.connection)
+      } else {
+        session.on('peerconnection', (pcEvent: PeerConnectionEvent) => {
+          setupTrackListener(pcEvent.peerconnection)
+        })
+      }
+
+      // Both 'accepted' and 'confirmed' fire per call — guard so the handler runs only once.
+      let activated = false
       const onActivated = () => {
+        if (activated) return
+        activated = true
         store.channels
-          .filter(ch => ch.id !== id && ch.status === 'active')
-          .forEach(ch => {
-            getSession(ch.id)?.hold()
-            store.updateStatus(ch.id, 'held')
+          .filter(channel => channel.id !== id && channel.status === 'active')
+          .forEach(channel => {
+            getSession(channel.id)?.hold()
+            store.updateStatus(channel.id, 'held')
           })
         store.updateStatus(id, 'active')
         store.startTimer(id)
@@ -96,18 +123,24 @@ export const useWebPhone = () => {
     store.isConnecting = false
   }
 
-  const call = (target: string): void => {
+  const call = async (target: string): Promise<void> => {
     const ua = getUA()
     if (!ua || !store.isRegistered) return
+    const stream = await getAudioStream()
+    if (!stream) return
     ua.call(target, {
-      mediaConstraints: { audio: true, video: false },
+      mediaConstraints: AUDIO_CONSTRAINTS,
+      mediaStream: stream,
       rtcOfferConstraints: { offerToReceiveAudio: true, offerToReceiveVideo: false },
     })
   }
 
-  const answer = (channelId: string): void => {
+  const answer = async (channelId: string): Promise<void> => {
+    const stream = await getAudioStream()
+    if (!stream) return
     getSession(channelId)?.answer({
-      mediaConstraints: { audio: true, video: false },
+      mediaConstraints: AUDIO_CONSTRAINTS,
+      mediaStream: stream,
     })
   }
 
@@ -136,6 +169,10 @@ export const useWebPhone = () => {
     store.updateMute(channelId, false)
   }
 
+  const updateNotes = (channelId: string, notes: string): void => {
+    store.updateNotes(channelId, notes)
+  }
+
   const sendDTMF = (channelId: string, tone: string): void => {
     getSession(channelId)?.sendDTMF(tone)
   }
@@ -144,8 +181,8 @@ export const useWebPhone = () => {
     channels: computed(() => store.channels),
     isRegistered: computed(() => store.isRegistered),
     isConnecting: computed(() => store.isConnecting),
-    incomingChannels: computed(() => store.incomingChannels),
-    activeChannels: computed(() => store.activeChannels),
+    history: computed(() => store.history),
+    lastDialed: computed(() => store.lastDialed),
     connect,
     disconnect,
     call,
@@ -155,6 +192,7 @@ export const useWebPhone = () => {
     resume,
     mute,
     unmute,
+    updateNotes,
     sendDTMF,
   }
 }
