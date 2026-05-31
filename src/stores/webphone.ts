@@ -1,25 +1,30 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { getSession } from '../core/sip'
-import { loadHistory, saveRecord, MAX_HISTORY } from '../core/db'
-import type { CallInfo, CallStatus, CallRecord, CallOutcome } from '../types'
+import { loadHistory, saveRecord, MAX_HISTORY, loadNotes, saveNote, deleteNote as deleteNoteDB, loadScheduledCalls, saveScheduledCall, deleteScheduledCall as deleteScheduledCallDB } from '../core/db'
+import type { CallInfo, CallStatus, CallRecord, CallOutcome, PhoneNote, NoteColor, ScheduledCall } from '../types'
 
 export const useWebPhoneStore = defineStore('webphone', () => {
   const channels = ref<CallInfo[]>([])
   const isRegistered = ref(false)
   const isConnecting = ref(false)
   const history = ref<CallRecord[]>([])
+  const notes = ref<PhoneNote[]>([])
+  const scheduledCalls = ref<ScheduledCall[]>([])
+
   loadHistory().then(records => { history.value = records }).catch(() => {})
+  loadNotes().then(loaded => { notes.value = loaded }).catch(() => {})
+  loadScheduledCalls().then(loaded => { scheduledCalls.value = loaded }).catch(() => {})
 
   const timers = new Map<string, ReturnType<typeof setInterval>>()
 
-  const incomingChannels = computed(() => channels.value.filter(channel => channel.status === 'ringing'))
+  const incomingChannels = computed(() => channels.value.filter(ch => ch.status === 'ringing'))
   const activeChannels = computed(() =>
-    channels.value.filter(channel => channel.status === 'active' || channel.status === 'held' || channel.status === 'remote_held'),
+    channels.value.filter(ch => ch.status === 'active' || ch.status === 'held' || ch.status === 'remote_held'),
   )
 
   const lastDialed = computed(() =>
-    history.value.find(record => record.direction === 'outgoing')?.remoteUri ?? null,
+    history.value.find(r => r.direction === 'outgoing')?.remoteUri ?? null,
   )
 
   const addToHistory = (record: CallRecord): void => {
@@ -30,10 +35,10 @@ export const useWebPhoneStore = defineStore('webphone', () => {
 
   const holdOtherActives = (excludeId: string): void => {
     channels.value
-      .filter(channel => channel.id !== excludeId && channel.status === 'active')
-      .forEach(channel => {
-        getSession(channel.id)?.hold()
-        channel.status = 'held'
+      .filter(ch => ch.id !== excludeId && ch.status === 'active')
+      .forEach(ch => {
+        getSession(ch.id)?.hold()
+        ch.status = 'held'
       })
   }
 
@@ -48,48 +53,80 @@ export const useWebPhoneStore = defineStore('webphone', () => {
 
   const updateStatus = (id: string, status: CallStatus): void => {
     if (status === 'active') holdOtherActives(id)
-    const channel = channels.value.find(channel => channel.id === id)
-    if (channel) channel.status = status
+    const ch = channels.value.find(c => c.id === id)
+    if (ch) ch.status = status
   }
 
   const updateMute = (id: string, isMuted: boolean): void => {
-    const channel = channels.value.find(channel => channel.id === id)
-    if (channel) channel.isMuted = isMuted
-  }
-
-  const updateNotes = (id: string, notes: string): void => {
-    const channel = channels.value.find(channel => channel.id === id)
-    if (channel) channel.notes = notes
+    const ch = channels.value.find(c => c.id === id)
+    if (ch) ch.isMuted = isMuted
   }
 
   const startTimer = (id: string): void => {
-    const channel = channels.value.find(channel => channel.id === id)
-    if (!channel) return
-    channel.startTime = new Date()
+    const ch = channels.value.find(c => c.id === id)
+    if (!ch) return
+    ch.startTime = new Date()
     timers.set(
       id,
       setInterval(() => {
-        if (channel.startTime) channel.duration = Math.floor((Date.now() - channel.startTime.getTime()) / 1000)
+        if (ch.startTime) ch.duration = Math.floor((Date.now() - ch.startTime.getTime()) / 1000)
       }, 1000),
     )
   }
 
   const removeChannel = (id: string): void => {
     const timer = timers.get(id)
-    if (timer) {
-      clearInterval(timer)
-      timers.delete(id)
-    }
-    const channel = channels.value.find(channel => channel.id === id)
-    if (channel) {
+    if (timer) { clearInterval(timer); timers.delete(id) }
+    const ch = channels.value.find(c => c.id === id)
+    if (ch) {
       let outcome: CallOutcome
-      if (channel.startTime !== null) outcome = 'answered'
-      else if (channel.direction === 'incoming') outcome = 'missed'
+      if (ch.startTime !== null) outcome = 'answered'
+      else if (ch.direction === 'incoming') outcome = 'missed'
       else outcome = 'failed'
-      addToHistory({ id, direction: channel.direction, remoteUri: channel.remoteUri, remoteName: channel.remoteName, duration: channel.duration, outcome, endedAt: new Date(), notes: channel.notes })
+      addToHistory({
+        id,
+        direction: ch.direction,
+        remoteUri: ch.remoteUri,
+        remoteName: ch.remoteName,
+        duration: ch.duration,
+        outcome,
+        endedAt: new Date(),
+      })
     }
-    const idx = channels.value.findIndex(channel => channel.id === id)
+    const idx = channels.value.findIndex(c => c.id === id)
     if (idx !== -1) channels.value.splice(idx, 1)
+  }
+
+  const addNote = (remoteUri: string, remoteName: string, text: string, color?: NoteColor): void => {
+    const note: PhoneNote = {
+      id: crypto.randomUUID(),
+      remoteUri,
+      remoteName,
+      text: text.trim(),
+      color,
+      createdAt: new Date(),
+    }
+    notes.value.unshift(note)
+    saveNote(note).catch(() => {})
+  }
+
+  const removeNote = (id: string): void => {
+    const idx = notes.value.findIndex(n => n.id === id)
+    if (idx !== -1) notes.value.splice(idx, 1)
+    deleteNoteDB(id).catch(() => {})
+  }
+
+  const addScheduledCall = (data: Omit<ScheduledCall, 'id'>): void => {
+    const entry: ScheduledCall = { id: crypto.randomUUID(), ...data }
+    scheduledCalls.value.push(entry)
+    scheduledCalls.value.sort((a, b) => a.scheduledAt.getTime() - b.scheduledAt.getTime())
+    saveScheduledCall(entry).catch(() => {})
+  }
+
+  const removeScheduledCall = (id: string): void => {
+    const idx = scheduledCalls.value.findIndex(s => s.id === id)
+    if (idx !== -1) scheduledCalls.value.splice(idx, 1)
+    deleteScheduledCallDB(id).catch(() => {})
   }
 
   return {
@@ -97,14 +134,19 @@ export const useWebPhoneStore = defineStore('webphone', () => {
     isRegistered,
     isConnecting,
     history,
+    notes,
     lastDialed,
     incomingChannels,
     activeChannels,
     addChannel,
     updateStatus,
     updateMute,
-    updateNotes,
     startTimer,
     removeChannel,
+    addNote,
+    removeNote,
+    scheduledCalls,
+    addScheduledCall,
+    removeScheduledCall,
   }
 })

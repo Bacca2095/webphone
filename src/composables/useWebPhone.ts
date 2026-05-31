@@ -3,7 +3,7 @@ import type { PeerConnectionEvent, HoldEvent } from 'jssip/lib/RTCSession'
 import type { RTCSessionEvent } from 'jssip/lib/UA'
 import { createUA, destroyUA, getUA, addSession, getSession, removeSession, attachAudio, detachAudio } from '../core/sip'
 import { useWebPhoneStore } from '../stores/webphone'
-import type { WebPhoneConfig } from '../types'
+import type { WebPhoneConfig, NoteColor } from '../types'
 
 const AUDIO_CONSTRAINTS = { audio: true, video: false } as const
 
@@ -52,7 +52,6 @@ export const useWebPhone = () => {
         startTime: null,
         duration: 0,
         isMuted: false,
-        notes: '',
       })
 
       const setupTrackListener = (pc: RTCPeerConnection) => {
@@ -169,8 +168,12 @@ export const useWebPhone = () => {
     store.updateMute(channelId, false)
   }
 
-  const updateNotes = (channelId: string, notes: string): void => {
-    store.updateNotes(channelId, notes)
+  const addNote = (remoteUri: string, remoteName: string, text: string, color?: NoteColor): void => {
+    store.addNote(remoteUri, remoteName, text, color)
+  }
+
+  const removeNote = (id: string): void => {
+    store.removeNote(id)
   }
 
   const sendDTMF = (channelId: string, tone: string): void => {
@@ -182,6 +185,7 @@ export const useWebPhone = () => {
     isRegistered: computed(() => store.isRegistered),
     isConnecting: computed(() => store.isConnecting),
     history: computed(() => store.history),
+    notes: computed(() => store.notes),
     lastDialed: computed(() => store.lastDialed),
     connect,
     disconnect,
@@ -192,7 +196,8 @@ export const useWebPhone = () => {
     resume,
     mute,
     unmute,
-    updateNotes,
+    addNote,
+    removeNote,
     sendDTMF,
   }
 }

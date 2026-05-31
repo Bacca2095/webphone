@@ -41,6 +41,8 @@
     "vue": "^3.5.0"
   },
   "dependencies": {
+    "@internationalized/date": "^3.12.2",
+    "@lucide/vue": "^1.17.0",
     "@vueuse/core": "14.3.0",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
@@ -64,7 +66,6 @@
     "eslint-plugin-vue": "10.8.0",
     "jiti": "2.7.0",
     "jsdom": "29.1.1",
-    "lucide-vue-next": "1.0.0",
     "npm-run-all2": "8.0.4",
     "oxfmt": "0.45.0",
     "oxlint": "1.60.0",

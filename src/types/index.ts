@@ -10,7 +10,6 @@ export interface CallRecord {
   duration: number
   outcome: CallOutcome
   endedAt: Date
-  notes: string
 }
 
 export type CallStatus =
@@ -31,7 +30,17 @@ export interface CallInfo {
   startTime: Date | null
   duration: number // seconds, updated each second while active
   isMuted: boolean
-  notes: string
+}
+
+export type NoteColor = 'yellow' | 'green' | 'blue' | 'pink' | 'orange' | 'purple'
+
+export interface PhoneNote {
+  id: string
+  remoteUri: string
+  remoteName: string
+  text: string
+  color?: NoteColor
+  createdAt: Date
 }
 
 export type ContactType = 'internal' | 'external' | 'service' | 'emergency'
@@ -41,6 +50,13 @@ export interface Contact {
   name: string
   phone: string  // extension, phone number, or SIP URI
   type?: ContactType
+}
+
+export interface ScheduledCall {
+  id: string
+  remoteUri: string
+  scheduledAt: Date
+  note?: string
 }
 
 export interface WebPhoneConfig {
