@@ -68,7 +68,7 @@ watchEffect(() => {
   <div class="min-h-screen bg-muted/30">
     <WebPhone
       ref="phone"
-      :float="true"
+      :floating="true"
       :contacts="contacts"
       @open-history="activePanel = 'history'"
       @open-notes="openNotes"

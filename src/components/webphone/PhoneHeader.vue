@@ -21,7 +21,7 @@ defineProps<{
   isConnecting: boolean
   isDark: boolean
   rootEl: HTMLElement | null
-  float?: boolean
+  floating?: boolean
   isDragging?: boolean
 }>()
 
@@ -48,7 +48,7 @@ const { connect, disconnect } = useWebPhone()
 <template>
   <div
     class="flex items-center justify-between px-5 py-3 bg-muted/70"
-    :class="float ? (isDragging ? 'cursor-grabbing' : 'cursor-grab') : ''"
+    :class="floating ? (isDragging ? 'cursor-grabbing' : 'cursor-grab') : ''"
   >
     <span class="text-xs font-medium text-muted-foreground">Webphone</span>
     <div class="flex items-center gap-2">
