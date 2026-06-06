@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Keyboard, NotebookPen, ChevronDown, ChevronUp } from '@lucide/vue'
 
-const props = defineProps<{
+defineProps<{
   showPad: boolean
   hasNotes: boolean
 }>()

@@ -3,7 +3,7 @@ import { ref, type Component } from 'vue'
 import { Phone, PhoneIncoming, PhoneMissed, PhoneOff, PhoneOutgoing, NotebookPen } from '@lucide/vue'
 import type { CallRecord } from '@/types'
 
-const props = defineProps<{
+defineProps<{
   history: CallRecord[]
 }>()
 

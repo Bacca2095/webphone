@@ -12,7 +12,7 @@ const STATUS_COLOR: Record<CallInfo['status'], string> = {
   failed: 'bg-destructive',
 }
 
-const props = defineProps<{
+defineProps<{
   channel: CallInfo
 }>()
 

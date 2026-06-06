@@ -12,7 +12,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import AudioSettings from './AudioSettings.vue'
 
-const props = defineProps<{
+defineProps<{
   isRegistered: boolean
   isConnecting: boolean
   isDark: boolean

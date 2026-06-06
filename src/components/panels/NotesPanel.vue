@@ -9,9 +9,6 @@ const props = defineProps<{
   targetUri?: string
 }>()
 
-const emit = defineEmits<{
-  call: [remoteUri: string]
-}>()
 
 const store = useWebPhoneStore()
 

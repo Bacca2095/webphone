@@ -2,7 +2,7 @@
 import { Phone, PhoneOff, PhoneMissed, Mic, MicOff, Pause, Play, Volume2, VolumeX } from '@lucide/vue'
 import type { CallInfo } from '@/types'
 
-const props = defineProps<{
+defineProps<{
   selected?: CallInfo
   callBtnMode: 'call' | 'disabled'
   isSpeakerMuted: boolean
