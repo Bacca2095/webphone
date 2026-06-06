@@ -56,8 +56,6 @@
     "tailwind-merge": "3.6.0"
   },
   "devDependencies": {
-    "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/git": "^10.0.1",
     "@semantic-release/github": "^12.0.8",
     "@tailwindcss/vite": "4.3.0",
     "@tsconfig/node24": "24.0.4",
