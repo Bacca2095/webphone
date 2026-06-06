@@ -14,7 +14,7 @@ const emit = defineEmits<{
 
 const store = useWebPhoneStore()
 
-const selectedDate = ref<CalendarDate>(today(getLocalTimeZone()))
+const selectedDate = ref<DateValue>(today(getLocalTimeZone()))
 
 // CalendarDate months are 1-based; JS Date months are 0-based
 const selectedJs = computed(() => new Date(
@@ -77,7 +77,7 @@ const submit = () => {
   <div class="flex flex-col h-full gap-0">
     <!-- shadcn Calendar -->
     <Calendar
-      :model-value="selectedDate"
+      :model-value="(selectedDate as any)"
       :event-dates="eventDates"
       locale="es"
       :week-starts-on="1"

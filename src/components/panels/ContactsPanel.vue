@@ -23,7 +23,7 @@ const TYPES: Array<{ value: ContactType; label: string; badge: string }> = [
 ]
 
 const typeLabel = (t?: ContactType) => TYPES.find(x => x.value === t)?.label ?? 'Interno'
-const typeBadge = (t?: ContactType) => TYPES.find(x => x.value === t)?.badge ?? TYPES[0].badge
+const typeBadge = (t?: ContactType) => TYPES.find(x => x.value === t)?.badge ?? TYPES[0]!.badge
 
 const filtered = () => {
   const q = search.value.toLowerCase()

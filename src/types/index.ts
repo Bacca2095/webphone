@@ -10,6 +10,7 @@ export interface CallRecord {
   duration: number
   outcome: CallOutcome
   endedAt: Date
+  notes?: string
 }
 
 export type CallStatus =
