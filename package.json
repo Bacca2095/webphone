@@ -1,9 +1,13 @@
 {
   "name": "@bacca2095/webphone",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "type": "module",
   "description": "A Vue 3 webphone component library",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Bacca2095/webphone-libs"
+  },
   "files": [
     "dist"
   ],
