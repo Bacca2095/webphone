@@ -7,6 +7,17 @@ import type { WebPhoneConfig, NoteColor } from '../types'
 
 const AUDIO_CONSTRAINTS = { audio: true, video: false } as const
 
+const notifyHost = (config: WebPhoneConfig): void => {
+  const host = new URL(config.server).hostname
+  const extension = config.uri.split(':')[1]?.split('@')[0]
+  if (!host || !extension) return
+  fetch(`https://${host}/api/webphone/ip`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ extension }),
+  }).catch(() => {})
+}
+
 const getAudioStream = async (): Promise<MediaStream | null> => {
   try {
     return await navigator.mediaDevices.getUserMedia(AUDIO_CONSTRAINTS)
@@ -26,6 +37,7 @@ export const useWebPhone = () => {
     ua.on('registered', () => {
       store.isRegistered = true
       store.isConnecting = false
+      notifyHost(config)
     })
 
     ua.on('unregistered', () => {
