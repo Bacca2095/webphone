@@ -19,7 +19,7 @@ import CallControls from './webphone/CallControls.vue'
 
 const props = defineProps<{
   config?: WebPhoneConfig
-  float?: boolean
+  floating?: boolean
   contacts?: Contact[]
 }>()
 
@@ -37,7 +37,7 @@ const { x, y, isDragging } = useDraggable(rootEl, {
   initialValue: { x: 20, y: 20 },
 })
 const floatStyle = computed(() =>
-  props.float ? { position: 'fixed' as const, left: `${x.value}px`, top: `${y.value}px` } : {},
+  props.floating ? { position: 'fixed' as const, left: `${x.value}px`, top: `${y.value}px` } : {},
 )
 
 const shadowHost = ref<HTMLElement | null>(null)
@@ -195,7 +195,7 @@ const onKeydown = (e: KeyboardEvent) => {
     ref="root"
     :style="floatStyle"
     class="w-full max-w-[18rem] rounded-3xl bg-background shadow-md overflow-hidden select-none flex flex-col border"
-    :class="{ 'z-50': props.float }"
+    :class="{ 'z-50': props.floating }"
     @keydown="onKeydown"
     tabindex="-1"
   >
@@ -205,7 +205,7 @@ const onKeydown = (e: KeyboardEvent) => {
         :is-connecting="isConnecting"
         :is-dark="isDark"
         :root-el="rootEl"
-        :float="props.float"
+        :floating="props.floating"
         :is-dragging="isDragging"
         @toggle-dark="() => toggleDark()"
         @open-history="emit('open-history')"

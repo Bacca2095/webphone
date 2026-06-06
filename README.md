@@ -28,12 +28,12 @@ The library requires Pinia. Register `WebPhonePlugin` after `createPinia()`.
 ```ts
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import { WebPhonePlugin } from '@bacca2095/webphone'
+import { WebPhone } from '@bacca2095/webphone'
 import '@bacca2095/webphone/style.css'
 
 const app = createApp(App)
 app.use(createPinia())
-app.use(WebPhonePlugin)
+app.use(WebPhone)
 app.mount('#app')
 ```
 
@@ -65,7 +65,7 @@ const contacts: Contact[] = [
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
 | `config` | `WebPhoneConfig` | No | SIP connection configuration. If omitted, the phone renders without connecting. |
-| `float` | `boolean` | No | Renders the phone as a fixed, draggable overlay. |
+| `floating` | `boolean` | No | Renders the phone as a fixed, draggable overlay. |
 | `contacts` | `Contact[]` | No | External contact list surfaced in the contacts panel. |
 
 ## WebPhone Emits
