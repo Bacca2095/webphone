@@ -42,19 +42,61 @@ app.mount('#app')
 ```vue
 <script setup lang="ts">
 import { WebPhone } from '@bacca2095/webphone'
-import type { WebPhoneConfig } from '@bacca2095/webphone'
+import type { WebPhoneConfig, Contact } from '@bacca2095/webphone'
 
 const config: WebPhoneConfig = {
   uri: 'sip:user@domain.com',
   password: 'secret',
-  servers: ['wss://sip.domain.com'],
+  server: 'wss://sip.domain.com',
 }
+
+const contacts: Contact[] = [
+  { id: '1', name: 'Alice', phone: 'sip:alice@domain.com', type: 'internal' },
+]
 </script>
 
 <template>
-  <WebPhone :config="config" />
+  <WebPhone :config="config" :contacts="contacts" />
 </template>
 ```
+
+## WebPhone Props
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `config` | `WebPhoneConfig` | No | SIP connection configuration. If omitted, the phone renders without connecting. |
+| `float` | `boolean` | No | Renders the phone as a fixed, draggable overlay. |
+| `contacts` | `Contact[]` | No | External contact list surfaced in the contacts panel. |
+
+## WebPhone Emits
+
+| Event | Payload | Description |
+|-------|---------|-------------|
+| `open-history` | — | Fired when the user navigates to the history panel. |
+| `open-notes` | `remoteUri?: string` | Fired when the user navigates to the notes panel. |
+| `open-contacts` | — | Fired when the user navigates to the contacts panel. |
+| `open-calendar` | — | Fired when the user navigates to the calendar panel. |
+
+## Types
+
+### `WebPhoneConfig`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `server` | `string` | Yes | WebSocket server URL — e.g. `wss://sip.domain.com` |
+| `uri` | `string` | Yes | SIP URI — e.g. `sip:user@domain.com` |
+| `password` | `string` | Yes | SIP account password |
+| `displayName` | `string` | No | Caller ID display name |
+| `iceServers` | `RTCIceServer[]` | No | STUN/TURN servers for ICE negotiation |
+
+### `Contact`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | `string` | Yes | Unique identifier |
+| `name` | `string` | Yes | Display name |
+| `phone` | `string` | Yes | Extension, phone number, or SIP URI |
+| `type` | `'internal' \| 'external' \| 'service' \| 'emergency'` | No | Contact category |
 
 ## API
 
@@ -77,30 +119,46 @@ const config: WebPhoneConfig = {
 | `useContacts` | Contacts CRUD and search |
 | `useWebPhoneStore` | Pinia store — reactive phone state |
 
-### Types
+### Additional Types
 
-```ts
-import type {
-  WebPhoneConfig,
-  CallInfo,
-  CallStatus,
-  CallDirection,
-  Contact,
-  ContactType,
-  PhoneNote,
-  NoteColor,
-  ScheduledCall,
-  MicPermission,
-} from '@bacca2095/webphone'
-```
+`CallInfo`, `CallStatus`, `CallDirection`, `PhoneNote`, `NoteColor`, `ScheduledCall`, `MicPermission`
 
-## Web Component
+## CDN Usage (Web Component)
 
-A standalone web component build is available for use outside Vue applications.
+The library ships a self-contained web component build that works without Vue or any bundler.
+
+**ES module (recommended):**
 
 ```html
-<script type="module" src="@bacca2095/webphone/webcomponent"></script>
+<script type="module" src="https://unpkg.com/@bacca2095/webphone/dist/webphone.es.js"></script>
+
+<web-phone></web-phone>
 ```
+
+**IIFE (no module support required):**
+
+```html
+<script src="https://unpkg.com/@bacca2095/webphone/dist/webphone.iife.js"></script>
+
+<web-phone></web-phone>
+```
+
+**Passing config via attribute:**
+
+```html
+<web-phone id="phone"></web-phone>
+
+<script type="module">
+  const phone = document.getElementById('phone')
+  phone.config = {
+    uri: 'sip:user@domain.com',
+    password: 'secret',
+    server: 'wss://sip.domain.com',
+  }
+</script>
+```
+
+> The web component bundles all dependencies including styles. No additional CSS import is needed.
 
 ## Demo
 
