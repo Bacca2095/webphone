@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/Bacca2095/webphone-libs/compare/v1.0.0...v1.1.0) (2026-06-06)
+
+
+### Features
+
+* actualizar acciones de GitHub a la versión 6 en los flujos de trabajo CI, Pages y Publish ([6d572dd](https://github.com/Bacca2095/webphone-libs/commit/6d572dd3fa7700f3492f03bdcbec35ac78e01cbe))
+
 # 1.0.0 (2026-06-06)
 
 
