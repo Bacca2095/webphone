@@ -1,5 +1,5 @@
 {
-  "name": "webphone",
+  "name": "@bacca2095/webphone",
   "version": "0.0.1",
   "type": "module",
   "description": "A Vue 3 webphone component library",
