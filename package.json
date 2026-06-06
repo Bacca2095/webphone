@@ -3,6 +3,21 @@
   "version": "1.1.0",
   "type": "module",
   "description": "A Vue 3 webphone component library",
+  "keywords": [
+    "vue",
+    "vue3",
+    "webphone",
+    "sip",
+    "webrtc",
+    "jssip",
+    "voip",
+    "component",
+    "library"
+  ],
+  "homepage": "https://bacca2095.github.io/webphone",
+  "bugs": {
+    "url": "https://github.com/Bacca2095/webphone/issues"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
