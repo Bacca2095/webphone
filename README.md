@@ -23,7 +23,7 @@ pnpm add @bacca2095/webphone
 
 ### 1. Register the plugin
 
-The library requires Pinia. Register `WebPhonePlugin` after `createPinia()`.
+The library requires Pinia. Register `WebPhone` as a plugin after `createPinia()`.
 
 ```ts
 import { createApp } from 'vue'
