@@ -1,73 +1,111 @@
-# webphone
+# @bacca2095/webphone
 
-This template should help get you started developing with Vue 3 in Vite.
+A Vue 3 WebPhone component library built on top of JsSIP for SIP/WebRTC communication.
 
-## Recommended IDE Setup
+[![npm version](https://img.shields.io/npm/v/@bacca2095/webphone)](https://www.npmjs.com/package/@bacca2095/webphone)
+[![license](https://img.shields.io/npm/l/@bacca2095/webphone)](LICENSE)
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## Requirements
 
-## Recommended Browser Setup
+- Node.js >= 24
+- Vue >= 3.5
+- Pinia >= 3.0
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
-
-## Type Support for `.vue` Imports in TS
-
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
+## Installation
 
 ```sh
-pnpm install
+npm install @bacca2095/webphone
+# or
+pnpm add @bacca2095/webphone
 ```
 
-### Compile and Hot-Reload for Development
+## Setup
 
-```sh
-pnpm dev
+### 1. Register the plugin
+
+The library requires Pinia. Register `WebPhonePlugin` after `createPinia()`.
+
+```ts
+import { createApp } from 'vue'
+import { createPinia } from 'pinia'
+import { WebPhonePlugin } from '@bacca2095/webphone'
+import '@bacca2095/webphone/style.css'
+
+const app = createApp(App)
+app.use(createPinia())
+app.use(WebPhonePlugin)
+app.mount('#app')
 ```
 
-### Type-Check, Compile and Minify for Production
+### 2. Use the component
 
-```sh
-pnpm build
+```vue
+<script setup lang="ts">
+import { WebPhone } from '@bacca2095/webphone'
+import type { WebPhoneConfig } from '@bacca2095/webphone'
+
+const config: WebPhoneConfig = {
+  uri: 'sip:user@domain.com',
+  password: 'secret',
+  servers: ['wss://sip.domain.com'],
+}
+</script>
+
+<template>
+  <WebPhone :config="config" />
+</template>
 ```
 
-### Run Unit Tests with [Vitest](https://vitest.dev/)
+## API
 
-```sh
-pnpm test:unit
+### Components
+
+| Component | Description |
+|-----------|-------------|
+| `WebPhone` | Main phone interface — dialer, active call controls, and panel navigation |
+| `NotesPanel` | Per-number persistent notes |
+| `HistoryPanel` | Call history with filtering |
+| `ContactsPanel` | Contacts management |
+| `CalendarPanel` | Scheduled calls |
+
+### Composables
+
+| Composable | Description |
+|------------|-------------|
+| `useWebPhone` | Core SIP/WebRTC logic — register, call, hold, transfer |
+| `useAudioDevices` | Audio input/output device enumeration and selection |
+| `useContacts` | Contacts CRUD and search |
+| `useWebPhoneStore` | Pinia store — reactive phone state |
+
+### Types
+
+```ts
+import type {
+  WebPhoneConfig,
+  CallInfo,
+  CallStatus,
+  CallDirection,
+  Contact,
+  ContactType,
+  PhoneNote,
+  NoteColor,
+  ScheduledCall,
+  MicPermission,
+} from '@bacca2095/webphone'
 ```
 
-### Run End-to-End Tests with [Playwright](https://playwright.dev)
+## Web Component
 
-```sh
-# Install browsers for the first run
-npx playwright install
+A standalone web component build is available for use outside Vue applications.
 
-# When testing on CI, must build the project first
-pnpm build
-
-# Runs the end-to-end tests
-pnpm test:e2e
-# Runs the tests only on Chromium
-pnpm test:e2e --project=chromium
-# Runs the tests of a specific file
-pnpm test:e2e tests/example.spec.ts
-# Runs the tests in debug mode
-pnpm test:e2e --debug
+```html
+<script type="module" src="@bacca2095/webphone/webcomponent"></script>
 ```
 
-### Lint with [ESLint](https://eslint.org/)
+## Demo
 
-```sh
-pnpm lint
-```
+A live demo is available at [bacca2095.github.io/webphone-libs](https://bacca2095.github.io/webphone-libs).
+
+## License
+
+[MIT](LICENSE)
