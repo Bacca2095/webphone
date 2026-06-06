@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Mic, Volume2 } from '@lucide/vue'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 import { Slider } from '@/components/ui/slider'
 import { Button } from '@/components/ui/button'
 import { useAudioDevices } from '@/composables/useAudioDevices'
@@ -23,18 +23,15 @@ const {
       <label class="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
         <Mic class="size-3.5" /> Micrófono
       </label>
-      <Select v-model="selectedInputId">
-        <SelectTrigger class="w-full min-w-0 truncate">
-          <SelectValue placeholder="Seleccionar micrófono" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem
+      <div class="w-full">
+        <NativeSelect v-model="selectedInputId" class="w-full truncate">
+          <NativeSelectOption
             v-for="device in inputDevices"
             :key="device.deviceId"
             :value="device.deviceId"
-          >{{ device.label || `Micrófono ${device.deviceId.slice(0, 6)}` }}</SelectItem>
-        </SelectContent>
-      </Select>
+          >{{ device.label || `Micrófono ${device.deviceId.slice(0, 6)}` }}</NativeSelectOption>
+        </NativeSelect>
+      </div>
       <div class="flex items-center gap-2 px-1">
         <Mic class="size-3 text-muted-foreground shrink-0" />
         <Slider
@@ -52,18 +49,15 @@ const {
       <label class="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
         <Volume2 class="size-3.5" /> Altavoz
       </label>
-      <Select v-model="selectedOutputId">
-        <SelectTrigger class="w-full min-w-0 truncate">
-          <SelectValue placeholder="Seleccionar altavoz" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem
+      <div class="w-full">
+        <NativeSelect v-model="selectedOutputId" class="w-full truncate">
+          <NativeSelectOption
             v-for="device in outputDevices"
             :key="device.deviceId"
             :value="device.deviceId"
-          >{{ device.label || `Altavoz ${device.deviceId.slice(0, 6)}` }}</SelectItem>
-        </SelectContent>
-      </Select>
+          >{{ device.label || `Altavoz ${device.deviceId.slice(0, 6)}` }}</NativeSelectOption>
+        </NativeSelect>
+      </div>
       <div class="flex items-center gap-2 px-1">
         <Volume2 class="size-3 text-muted-foreground shrink-0" />
         <Slider

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useWebPhone } from '@/composables/useWebPhone'
 import { useAudioDevices } from '@/composables/useAudioDevices'
+import { useSipConfig } from '@/composables/useSipConfig'
 import { playDTMF, startRing, startRingback, playHangup } from '@/composables/useSounds'
 import { setOutputMuted } from '@/core/sip'
 import type { WebPhoneConfig, Contact } from '@/types'
@@ -71,7 +72,12 @@ onMounted(async () => {
   const rootNode = rootEl.value?.getRootNode()
   if (rootNode instanceof ShadowRoot) shadowHost.value = rootNode.host as HTMLElement
   await checkPermission()
-  if (props.config) connect(props.config)
+  if (props.config) {
+    connect(props.config)
+  } else {
+    const { sipConfig, isConfigured } = useSipConfig()
+    if (isConfigured.value) connect({ ...sipConfig.value })
+  }
 })
 
 const selectedId = ref<string | null>(null)

@@ -10,7 +10,11 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 import AudioSettings from './AudioSettings.vue'
+import { useSipConfig } from '@/composables/useSipConfig'
+import { useWebPhone } from '@/composables/useWebPhone'
 
 defineProps<{
   isRegistered: boolean
@@ -30,11 +34,15 @@ const emit = defineEmits<{
 }>()
 
 const menuOpen = ref(false)
+const activeTab = ref<'account' | 'audio'>('account')
 
 const openHistory = () => { menuOpen.value = false; emit('open-history') }
 const openNotes = () => { menuOpen.value = false; emit('open-notes') }
 const openContacts = () => { menuOpen.value = false; emit('open-contacts') }
 const openCalendar = () => { menuOpen.value = false; emit('open-calendar') }
+
+const { sipConfig, isConfigured } = useSipConfig()
+const { connect, disconnect } = useWebPhone()
 </script>
 
 <template>
@@ -66,7 +74,6 @@ const openCalendar = () => { menuOpen.value = false; emit('open-calendar') }
         <Moon v-else class="size-3.5" />
       </button>
 
-      <!-- Overflow menu -->
       <Popover v-model:open="menuOpen">
         <PopoverTrigger as-child>
           <button class="text-muted-foreground hover:text-foreground transition-colors">
@@ -103,8 +110,7 @@ const openCalendar = () => { menuOpen.value = false; emit('open-calendar') }
         </PopoverContent>
       </Popover>
 
-      <!-- Settings -->
-      <Dialog>
+      <Dialog @update:open="(open) => { if (open) activeTab = 'account' }">
         <DialogTrigger as-child>
           <button class="text-muted-foreground hover:text-foreground transition-colors">
             <Settings class="size-3.5" />
@@ -112,10 +118,86 @@ const openCalendar = () => { menuOpen.value = false; emit('open-calendar') }
         </DialogTrigger>
         <DialogContent class="sm:max-w-xs" :to="rootEl ?? undefined">
           <DialogHeader>
-            <DialogTitle>Dispositivos de audio</DialogTitle>
-            <DialogDescription>Micrófono y altavoz para las llamadas.</DialogDescription>
+            <DialogTitle>Ajustes</DialogTitle>
+            <DialogDescription class="sr-only">Configuración de cuenta SIP y audio.</DialogDescription>
           </DialogHeader>
-          <AudioSettings />
+
+          <div class="flex gap-1 bg-muted rounded-lg p-1">
+            <button
+              class="flex-1 py-1.5 text-sm font-medium rounded-md transition-colors"
+              :class="
+                activeTab === 'account'
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              "
+              @click="activeTab = 'account'"
+            >
+              Cuenta SIP
+            </button>
+            <button
+              class="flex-1 py-1.5 text-sm font-medium rounded-md transition-colors"
+              :class="
+                activeTab === 'audio'
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              "
+              @click="activeTab = 'audio'"
+            >
+              Audio
+            </button>
+          </div>
+
+          <div v-if="activeTab === 'account'" class="space-y-3">
+            <div class="space-y-1.5">
+              <label class="text-xs text-muted-foreground">Servidor WebSocket</label>
+              <Input
+                v-model="sipConfig.server"
+                placeholder="wss://sip.ejemplo.com"
+                :disabled="isRegistered || isConnecting"
+              />
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-xs text-muted-foreground">URI SIP</label>
+              <Input
+                v-model="sipConfig.uri"
+                placeholder="sip:usuario@dominio.com"
+                :disabled="isRegistered || isConnecting"
+              />
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-xs text-muted-foreground">Contraseña</label>
+              <Input
+                v-model="sipConfig.password"
+                type="password"
+                :disabled="isRegistered || isConnecting"
+              />
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-xs text-muted-foreground">Nombre visible (opcional)</label>
+              <Input
+                v-model="sipConfig.displayName"
+                placeholder="Ej. Juan García"
+                :disabled="isRegistered || isConnecting"
+              />
+            </div>
+            <div class="pt-1">
+              <Button
+                v-if="!isRegistered && !isConnecting"
+                class="w-full"
+                :disabled="!isConfigured"
+                @click="connect({ ...sipConfig })"
+              >
+                Conectar
+              </Button>
+              <Button v-else class="w-full" variant="outline" @click="disconnect()">
+                {{ isConnecting ? 'Cancelar' : 'Desconectar' }}
+              </Button>
+            </div>
+          </div>
+
+          <div v-else>
+            <AudioSettings />
+          </div>
         </DialogContent>
       </Dialog>
     </div>

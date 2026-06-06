@@ -3,7 +3,6 @@ import { ref, computed, useTemplateRef, watchEffect } from 'vue'
 import { useElementBounding } from '@vueuse/core'
 import WebPhone from '@/components/WebPhone.vue'
 import FloatingPanel from '@/components/FloatingPanel.vue'
-import PlaygroundControls from './PlaygroundControls.vue'
 import NotesPanel from '@/components/panels/NotesPanel.vue'
 import HistoryPanel from '@/components/panels/HistoryPanel.vue'
 import ContactsPanel from '@/components/panels/ContactsPanel.vue'
@@ -76,7 +75,6 @@ watchEffect(() => {
       @open-contacts="activePanel = 'contacts'"
       @open-calendar="activePanel = 'calendar'"
     />
-    <PlaygroundControls />
 
     <FloatingPanel
       :open="activePanel === 'history'"
