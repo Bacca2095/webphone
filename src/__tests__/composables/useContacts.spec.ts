@@ -3,9 +3,9 @@ import { useContacts } from '../../composables/useContacts'
 import type { Contact } from '../../types'
 
 vi.mock('../../core/db', () => ({
-  loadContacts: vi.fn(() => Promise.resolve([])),
-  saveContact: vi.fn(() => Promise.resolve()),
-  deleteContact: vi.fn(() => Promise.resolve()),
+  loadContacts: vi.fn<() => Promise<unknown[]>>(() => Promise.resolve([])),
+  saveContact: vi.fn<() => Promise<void>>(() => Promise.resolve()),
+  deleteContact: vi.fn<() => Promise<void>>(() => Promise.resolve()),
 }))
 
 describe('useContacts', () => {

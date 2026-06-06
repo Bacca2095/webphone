@@ -4,20 +4,20 @@ import { useWebPhoneStore } from '../../stores/webphone'
 import type { CallInfo } from '../../types'
 
 vi.mock('../../core/db', () => ({
-  loadHistory: vi.fn<() => void>(() => Promise.resolve([])),
-  saveRecord: vi.fn(() => Promise.resolve()),
-  loadNotes: vi.fn(() => Promise.resolve([])),
-  saveNote: vi.fn(() => Promise.resolve()),
-  deleteNote: vi.fn(() => Promise.resolve()),
-  loadScheduledCalls: vi.fn(() => Promise.resolve([])),
-  saveScheduledCall: vi.fn(() => Promise.resolve()),
-  deleteScheduledCall: vi.fn(() => Promise.resolve()),
+  loadHistory: vi.fn<() => Promise<unknown[]>>(() => Promise.resolve([])),
+  saveRecord: vi.fn<() => Promise<void>>(() => Promise.resolve()),
+  loadNotes: vi.fn<() => Promise<unknown[]>>(() => Promise.resolve([])),
+  saveNote: vi.fn<() => Promise<void>>(() => Promise.resolve()),
+  deleteNote: vi.fn<() => Promise<void>>(() => Promise.resolve()),
+  loadScheduledCalls: vi.fn<() => Promise<unknown[]>>(() => Promise.resolve([])),
+  saveScheduledCall: vi.fn<() => Promise<void>>(() => Promise.resolve()),
+  deleteScheduledCall: vi.fn<() => Promise<void>>(() => Promise.resolve()),
   MAX_HISTORY: 50,
 }))
 
-const mockHold = vi.fn()
+const mockHold = vi.fn<() => void>()
 vi.mock('../../core/sip', () => ({
-  getSession: vi.fn(() => ({ hold: mockHold })),
+  getSession: vi.fn<() => { hold: () => void }>(() => ({ hold: mockHold })),
 }))
 
 const makeChannel = (overrides: Partial<CallInfo> = {}): CallInfo => ({
