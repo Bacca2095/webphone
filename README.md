@@ -162,7 +162,7 @@ The library ships a self-contained web component build that works without Vue or
 
 ## Demo
 
-A live demo is available at [bacca2095.github.io/webphone-libs](https://bacca2095.github.io/webphone-libs).
+A live demo is available at [bacca2095.github.io/webphone](https://bacca2095.github.io/webphone).
 
 ## License
 
