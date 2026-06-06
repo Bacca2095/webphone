@@ -27,6 +27,7 @@
     "build": "run-p type-check \"build-only {@}\" --",
     "build:wc": "vite build --config vite.wc.config.ts",
     "build:all": "run-s build build:wc",
+    "build:demo": "vite build --config vite.demo.config.ts",
     "preview": "vite preview",
     "test:unit": "vitest",
     "build-only": "vite build",
